@@ -4,68 +4,136 @@ DG.then(function() {
         zoom: 12
     });
 
-    //Add popup
-    // DG.marker([54.98, 73.37]).addTo(map).bindPopup('Я попап!');
+    var groups = {
+        0: DG.featureGroup(),   
+        1: DG.featureGroup(),   
+        2: DG.featureGroup(),   
+        3: DG.featureGroup(),   
+        4: DG.featureGroup(), 
+    };
+    var colorIcons = generateIcons();
+    findMarkers('Омск', 'Разливное пиво');
 
+    /**
+     * Generate color icons
+     * @return object icons
+     */
+    function generateIcons() {
+        var colors = {
+            0: '#c8a2c8', 
+            1: '#0048FF', 
+            2: '#00E5FF', 
+            3: '#FFFFFF', 
+            green: 'green', 
+            red: 'red'
+        };
+        var icons = [];
 
-    var myIcons = [];
-    var colors = ['']
-    myIcons[0] = DG.divIcon({
-        html: '<div style="background-color: #c8a2c8; width: 8px; height: 8px;"></div>',
-        iconSize: [8, 8]
-    });
-    myIcons[1] = DG.divIcon({
-        html: '<div style="background-color: #0048FF; width: 8px; height: 8px;"></div>',
-        iconSize: [8, 8]
-    });
-    myIcons[2] = DG.divIcon({
-        html: '<div style="background-color: #00E5FF; width: 8px; height: 8px;"></div>',
-        iconSize: [8, 8]
-    });
-    myIcons[3] = DG.divIcon({
-        html: '<div style="background-color: green; width: 8px; height: 8px;"></div>',
-        iconSize: [8, 8]
-    });
-    myIcons[4] = DG.divIcon({
-        html: '<div style="background-color: red; width: 8px; height: 8px;"></div>',
-        iconSize: [8, 8]
-    });
-    myIcons[5] = DG.divIcon({
-        iconSize: [8, 8]
-    });
+        $.each(colors, function(index, value) {
+            icons[index] = DG.divIcon({
+                html: '<div style="background-color: ' + value + '; width: 8px; height: 8px;"></div>',
+                iconSize: [8, 8]
+            });
+        }); 
+       
+        return icons;
+    }
 
-    $.ajax({
-      url: 'http://catalog.api.2gis.ru/search?what=%D1%80%D0%B0%D0%B7%D0%BB%D0%B8%D0%B2%D0%BD%D0%BE%D0%B5%20%D0%BF%D0%B8%D0%B2%D0%BE&where=%D0%9E%D0%BC%D1%81%D0%BA&version=1.3&format=short&key=ruczoy1743',
-      success: function(data) {
-        $.each(data.result, function(index, value ) {
-            console.log(index);
-            // console.log(value);
-            var indexIcon = 5;
-            if (index < 3) {
-                indexIcon = index;
+    /**
+     * Find markers
+     * @param string location (Example: Omsk)
+     * @param string query (Example: Beer)
+     */
+    function findMarkers(location, query) {
+        $.ajax({
+            url: 'http://catalog.api.2gis.ru/search?what=' + query + '&where=' + location + '&version=1.3&format=short&key=ruczoy1743',
+            success: function(data) {
+                $.each(data.result, function(index, value ) {
+                    var indexIcon = 3;
+
+                    if (index < 3) {
+                        indexIcon = index;
+                    }
+                    DG.marker([value.lat, value.lon], {icon: colorIcons[indexIcon]}).addTo(groups[indexIcon]).bindPopup(value.name);
+                });
+
+                showMarkers(groups[0]);
+                showMarkers(groups[1]);
+                showMarkers(groups[2]);
+                showMarkers(groups[3]);
             }
-            DG.marker([value.lat, value.lon], {icon: myIcons[indexIcon]}).addTo(map).bindPopup(value.name);
         });
+    }
 
-        $('.results').html(data);
-      }
-    });
+    function showMarkers(markerGroup) {
+        markers = markerGroup;
+        markers.addTo(map);
+    };
+
+    function hideMarkers(markerGroup) {
+        markers = markerGroup;
+        markers.removeFrom(map);
+    };
 
 
+    // Added current location to inputs
     map.on('click', function(e) {
-        console.log(e.latlng);
         $('input[name="lat"]').val(e.latlng.lat);
         $('input[name="lon"]').val(e.latlng.lng);
     });
 
+    // Added new marker to map and update markers lists
     $('#saveMarker').on('click', function(e) {
-        var listCustomMarkers = $('#listCustomMarkers');
-        var row = '';
-        var color = ($('input[name="color"]:checked').val() == 'red') ? 'danger' : 'success';
-        row += '<li class="list-group-item list-group-item-' + color + '">';
-        row += $('input[name="lat"]').val() + ' ' + $('input[name="lon"]').val();
-        row += '</li>';
+        var lat = $('input[name="lat"]').val();
+        var lon = $('input[name="lon"]').val();
+        var name = $('textarea[name="text"]').val();
+        var color = $('input[name="color"]:checked').val();
+        if (lat != '' && lon != '' && name != '') {
+            $('.js-alert').hide();
+            var listColor = ($('input[name="color"]:checked').val() == 'red') ? 'danger' : 'success';
+            var listCustomMarkers = $('.js-list-' + color);
+            var row = '';
+            row += '<li class="list-group-item list-group-item-' + listColor + '">';
+            row += lat + ' ' + lon;
+            row += '</li>';
+            listCustomMarkers.append(row);
+            DG.marker([lat, lon], {icon: colorIcons[color]}).addTo(groups[4]).bindPopup(name);
+            showMarkers(groups[4]);
+        } else {
+            $('.js-alert').show();
+        }
+    });
 
-        listCustomMarkers.append(row);
+    // On/Off marker group
+    $('.js-group').on('click', function(e) {
+        var button = $(this);
+        var group;
+        switch(button.attr('name')) {
+            case 'first': 
+                group = groups[0];
+                break;
+            case 'second': 
+                group = groups[1];
+                break;
+            case 'third': 
+                group = groups[2];
+                break;
+            case 'other': 
+                group = groups[3];
+                break;
+            case 'custom': 
+                group = groups[4];
+                break;
+        }
+        if(button.hasClass('btn-default')) {
+            button.removeClass('btn-default');
+            button.addClass('btn-primary');
+            showMarkers(group);
+        } else {
+            button.removeClass('btn-primary');
+            button.addClass('btn-default');
+            hideMarkers(group);
+        }
+
     });
 });
