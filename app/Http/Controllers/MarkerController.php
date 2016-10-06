@@ -9,6 +9,13 @@ use App\Marker;
 
 class MarkerController extends Controller
 {
+	/**
+     * Display the all resource.
+     */
+    public function index()
+    {
+    	return Marker::all();
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -24,14 +31,18 @@ class MarkerController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      *
      * @return void
      */
-    public function update($id, Request $request)
+    public function update(Request $request)
     {
-        $marker = Marker::findOrFail($id);
-        $marker->update($request->all());
+        if($request->id) {
+            $marker = Marker::findOrFail($request->id);
+            $marker->update($request->all());
+
+            return $marker->id;
+        }
     }
 
 

@@ -11,5 +11,5 @@ class Marker extends Model
      *
      * @var array
      */
-    protected $fillable = ['name', 'lat', 'lon'];
+    protected $fillable = ['name', 'lat', 'lon', 'color'];
 }

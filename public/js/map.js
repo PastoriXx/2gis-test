@@ -13,6 +13,7 @@ DG.then(function() {
     };
     var colorIcons = generateIcons();
     findMarkers('Омск', 'Разливное пиво');
+    loadMarkers();
 
     /**
      * Generate color icons
@@ -48,7 +49,7 @@ DG.then(function() {
         $.ajax({
             url: 'http://catalog.api.2gis.ru/search?what=' + query + '&where=' + location + '&version=1.3&format=short&key=ruczoy1743',
             success: function(data) {
-                $.each(data.result, function(index, value ) {
+                $.each(data.result, function(index, value) {
                     var indexIcon = 3;
 
                     if (index < 3) {
@@ -76,11 +77,42 @@ DG.then(function() {
     };
 
     function clearForm() {
+        $('input[name="id"]').val('');
         $('input[name="lat"]').val('');
         $('input[name="lon"]').val('');
         $('textarea[name="text"]').val('');
     };
 
+    // Load marker from database
+    function loadMarkers() {
+        $.ajax({
+            method: 'GET',
+            url: 'marker',
+            success: function(data) {
+                $.each(data, function(index, value) {
+                    console.log(value);
+                    var itemColor = (value.color == 'red') ? 'danger' : 'success';
+                    addMarkerToList(itemColor, value.color, value.id, value.lat, value.lon, value.name);
+                });
+                updateEventEditButton();
+            }, error: function() {}
+        });
+    }
+
+    // Add new row to marker list                
+    function addMarkerToList(itemColor, color, id, lat, lon, name) {
+        var listCustomMarkers = $('.js-list-' + color);
+        var row = '';
+        row += '<li class="list-group-item list-group-item-' + itemColor + '" data-lat="' + lat +'" data-lon="' + lon + '" data-id="' + id + '">';
+        row += '<span>' + name + '</span>';
+        row += '<button class="pull-right js-edit-marker">Edit</button>'
+        row += '</li>';    
+        listCustomMarkers.append(row);
+        updateEventEditButton();
+        // Add marker to map
+        DG.marker([lat, lon], {icon: colorIcons[color]}).addTo(groups[4]).bindPopup(name);
+        showMarkers(groups[4]);
+    } 
 
     // Added current location to inputs
     map.on('click', function(e) {
@@ -101,30 +133,23 @@ DG.then(function() {
         if (lat != '' && lon != '' && name != '') {
             $('.js-alert').hide();
 
+            var dataMarker = {lat: lat, lon: lon, color: color, name: name};
+
             if (id != '' && id != undefined) {
-                url = 'marker/update/' + id;
+                url = 'marker/update';
+                dataMarker.id = id;
             }
-            var dataMarker = {lat: lat, lon: lon, name: name, id: id};
 
             $.ajax({
                 method: 'POST',
                 url: url,
                 data: dataMarker,
-                success: function(data) {
-                    // Create new row to marker list                
-                    var listColor = ($('input[name="color"]:checked').val() == 'red') ? 'danger' : 'success';
-                    var listCustomMarkers = $('.js-list-' + color);
-                    var row = '';
-                    row += '<li class="list-group-item list-group-item-' + listColor + '" data-lat="' + lat +'" data-lon="' + lon + '" data-id="' + id + '">';
-                    row += '<span>' + name + '</span>';
-                    row += '<button class="pull-right js-edit-marker">Edit</button>'
-                    row += '</li>';    
-                    listCustomMarkers.append(row);
-                    updateEventEditButton();
-                    // Add marker to map
-                    DG.marker([lat, lon], {icon: colorIcons[color]}).addTo(groups[4]).bindPopup(name);
-                    showMarkers(groups[4]);
+                success: function(id) {
+                    $('.list-group-item[data-id=' + id + ']').remove();
 
+                    // Add new row to marker list
+                    var itemColor = ($('input[name="color"]:checked').val() == 'red') ? 'danger' : 'success';
+                    addMarkerToList(itemColor, color, id, lat, lon, name);
                     clearForm();
                 }, error: function() {
                     $('.js-alert').text('When you save an error occurred!');
@@ -169,14 +194,15 @@ DG.then(function() {
         }
     });
 
+    // Update event
     function updateEventEditButton() {
         $('.js-edit-marker').on('click', function(e) {
-            var marker = $('.js-edit-marker').parent();
+            var marker = $(this).parent();
             var id = marker.data('id');
             $('form').append('<input name="id" value="' + id + '" hidden>');
             $('input[name="lat"]').val(marker.data('lat'));
             $('input[name="lon"]').val(marker.data('lon'));
             $('textarea[name="text"]').val(marker.find('span').text());
         });        
-    }
+    }   
 });
