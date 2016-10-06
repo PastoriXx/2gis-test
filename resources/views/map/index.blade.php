@@ -8,8 +8,8 @@
     <body>
         <div class="container form-horizontal">
             <h1>2gis Markers</h1>
+            <hr>
             <div class="col-sm-3">
-                <hr>
                 <h3>On/Off Markers</h3>
                 <div class="form-group">
                     <button class="btn btn-primary js-group" name="first">First</button>
@@ -20,37 +20,38 @@
                 </div>                
                 <hr>
                 <h3>Add New Marker</h3>
-                <div class="alert alert-danger js-alert" hidden>All fields must be filled!</div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Lat *:</label>
-                    <div class="col-sm-10">
-                        <input type="number" name="lat" class="form-control">
+                <form>                
+                    <div class="alert alert-danger js-alert" hidden>All fields must be filled!</div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Lat *:</label>
+                        <div class="col-sm-9">
+                            <input type="number" name="lat" class="form-control">
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Lon *:</label>
-                    <div class="col-sm-10">
-                        <input type="number" name="lon" class="form-control">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Lon *:</label>
+                        <div class="col-sm-9">
+                            <input type="number" name="lon" class="form-control">
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Text *:</label>
-                    <div class="col-sm-10">
-                        <textarea class="form-control" name="text"></textarea>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Text *:</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" name="text"></textarea>
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Color:</label>
-                    <div class="col-sm-10 radio">
-                        <label><input type="radio" name="color" value="green" checked>Green</label>
-                        <label><input type="radio" name="color" value="red">Red</label>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Color:</label>
+                        <div class="col-sm-9 radio">
+                            <label><input type="radio" name="color" value="green" checked>Green</label>
+                            <label><input type="radio" name="color" value="red">Red</label>
+                        </div>
                     </div>
-                </div>
 
-                <button id="saveMarker" class="btn btn-primary">Save</button>
-                
+                    <button id="saveMarker" class="btn btn-primary">Save</button>
+                </form>
                 <hr>
 
                 <ul class="list-group js-list-green"></ul>

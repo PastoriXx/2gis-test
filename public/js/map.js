@@ -75,6 +75,12 @@ DG.then(function() {
         markers.removeFrom(map);
     };
 
+    function clearForm() {
+        $('input[name="lat"]').val('');
+        $('input[name="lon"]').val('');
+        $('textarea[name="text"]').val('');
+    };
+
 
     // Added current location to inputs
     map.on('click', function(e) {
@@ -84,22 +90,49 @@ DG.then(function() {
 
     // Added new marker to map and update markers lists
     $('#saveMarker').on('click', function(e) {
+        e.preventDefault();
         var lat = $('input[name="lat"]').val();
         var lon = $('input[name="lon"]').val();
         var name = $('textarea[name="text"]').val();
+        var id = $('input[name="id"]').val();
+        var url = 'marker/store'; 
         var color = $('input[name="color"]:checked').val();
+
         if (lat != '' && lon != '' && name != '') {
             $('.js-alert').hide();
-            var listColor = ($('input[name="color"]:checked').val() == 'red') ? 'danger' : 'success';
-            var listCustomMarkers = $('.js-list-' + color);
-            var row = '';
-            row += '<li class="list-group-item list-group-item-' + listColor + '">';
-            row += lat + ' ' + lon;
-            row += '</li>';
-            listCustomMarkers.append(row);
-            DG.marker([lat, lon], {icon: colorIcons[color]}).addTo(groups[4]).bindPopup(name);
-            showMarkers(groups[4]);
+
+            if (id != '' && id != undefined) {
+                url = 'marker/update/' + id;
+            }
+            var dataMarker = {lat: lat, lon: lon, name: name, id: id};
+
+            $.ajax({
+                method: 'POST',
+                url: url,
+                data: dataMarker,
+                success: function(data) {
+                    // Create new row to marker list                
+                    var listColor = ($('input[name="color"]:checked').val() == 'red') ? 'danger' : 'success';
+                    var listCustomMarkers = $('.js-list-' + color);
+                    var row = '';
+                    row += '<li class="list-group-item list-group-item-' + listColor + '" data-lat="' + lat +'" data-lon="' + lon + '" data-id="' + id + '">';
+                    row += '<span>' + name + '</span>';
+                    row += '<button class="pull-right js-edit-marker">Edit</button>'
+                    row += '</li>';    
+                    listCustomMarkers.append(row);
+                    updateEventEditButton();
+                    // Add marker to map
+                    DG.marker([lat, lon], {icon: colorIcons[color]}).addTo(groups[4]).bindPopup(name);
+                    showMarkers(groups[4]);
+
+                    clearForm();
+                }, error: function() {
+                    $('.js-alert').text('When you save an error occurred!');
+                    $('.js-alert').show();
+                }
+            });
         } else {
+            $('.js-alert').text('All fields must be filled!');
             $('.js-alert').show();
         }
     });
@@ -134,6 +167,16 @@ DG.then(function() {
             button.addClass('btn-default');
             hideMarkers(group);
         }
-
     });
+
+    function updateEventEditButton() {
+        $('.js-edit-marker').on('click', function(e) {
+            var marker = $('.js-edit-marker').parent();
+            var id = marker.data('id');
+            $('form').append('<input name="id" value="' + id + '" hidden>');
+            $('input[name="lat"]').val(marker.data('lat'));
+            $('input[name="lon"]').val(marker.data('lon'));
+            $('textarea[name="text"]').val(marker.find('span').text());
+        });        
+    }
 });
