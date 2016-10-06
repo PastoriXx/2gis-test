@@ -14,3 +14,6 @@
 Route::get('/', function () {
     return view('map.index');
 });
+
+Route::post('marker/store', 'MarkerController@store');
+Route::post('marker/update', 'MarkerController@update');
