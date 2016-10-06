@@ -17,3 +17,4 @@ Route::get('/', function () {
 
 Route::post('marker/store', 'MarkerController@store');
 Route::post('marker/update', 'MarkerController@update');
+Route::get('marker/', 'MarkerController@index');
