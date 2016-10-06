@@ -59,7 +59,7 @@
             </div>
 
             <div class="form-group col-sm-9">
-                <div id="map" style="width: 100%; height: 900px;"></div>
+                <div id="map" data-key="{{ env('API_2GIS_KEY') }}" style="width: 100%; height: 900px;"></div>
             </div>
         </div>
 

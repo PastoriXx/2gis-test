@@ -12,7 +12,8 @@ DG.then(function() {
         4: DG.featureGroup(), 
     };
     var colorIcons = generateIcons();
-    findMarkers('Омск', 'Разливное пиво');
+    var apiKey = $('#map').data('key');
+    findMarkers(apiKey,'Омск', 'Разливное пиво');
     loadMarkers();
 
     /**
@@ -42,12 +43,13 @@ DG.then(function() {
 
     /**
      * Find markers
+     * @param string key (2gis api key)
      * @param string location (Example: Omsk)
      * @param string query (Example: Beer)
      */
-    function findMarkers(location, query) {
+    function findMarkers(key, location, query) {
         $.ajax({
-            url: 'http://catalog.api.2gis.ru/search?what=' + query + '&where=' + location + '&version=1.3&format=short&key=ruczoy1743',
+            url: 'http://catalog.api.2gis.ru/search?what=' + query + '&where=' + location + '&version=1.3&format=short&key=' + key,
             success: function(data) {
                 $.each(data.result, function(index, value) {
                     var indexIcon = 3;
@@ -90,7 +92,6 @@ DG.then(function() {
             url: 'marker',
             success: function(data) {
                 $.each(data, function(index, value) {
-                    console.log(value);
                     var itemColor = (value.color == 'red') ? 'danger' : 'success';
                     addMarkerToList(itemColor, value.color, value.id, value.lat, value.lon, value.name);
                 });
