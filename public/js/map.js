@@ -46,6 +46,7 @@ DG.then(function() {
      * @param string key (2gis api key)
      * @param string location (Example: Omsk)
      * @param string query (Example: Beer)
+     * @return void
      */
     function findMarkers(key, location, query) {
         $.ajax({
@@ -68,16 +69,30 @@ DG.then(function() {
         });
     }
 
+    /**
+     * Show marger group
+     * @param  DG.featureGroup() markerGroup
+     * @return void
+     */
     function showMarkers(markerGroup) {
         markers = markerGroup;
         markers.addTo(map);
     };
 
+    /**
+     * Hide marker group
+     * @param  DG.featureGroup() markerGroup
+     * @return void
+     */
     function hideMarkers(markerGroup) {
         markers = markerGroup;
         markers.removeFrom(map);
     };
 
+    /**
+     * Clear inputs
+     * @return void
+     */
     function clearForm() {
         $('input[name="id"]').val('');
         $('input[name="lat"]').val('');
@@ -85,7 +100,10 @@ DG.then(function() {
         $('textarea[name="text"]').val('');
     };
 
-    // Load marker from database
+    /**
+     * Load marker from database
+     * @return void
+     */
     function loadMarkers() {
         $.ajax({
             method: 'GET',
@@ -100,7 +118,16 @@ DG.then(function() {
         });
     }
 
-    // Add new row to marker list                
+    /**
+     * Add new row to marker list
+     * @param string itemColor
+     * @param string color
+     * @param int id      
+     * @param int lat     
+     * @param int lon     
+     * @param string name 
+     * @return void
+     */
     function addMarkerToList(itemColor, color, id, lat, lon, name) {
         var listCustomMarkers = $('.js-list-' + color);
         var row = '';
@@ -121,7 +148,9 @@ DG.then(function() {
         $('input[name="lon"]').val(e.latlng.lng);
     });
 
-    // Added new marker to map and update markers lists
+    /**
+     * Added new marker to map and update markers lists
+     */
     $('#saveMarker').on('click', function(e) {
         e.preventDefault();
         var lat = $('input[name="lat"]').val();
@@ -163,7 +192,9 @@ DG.then(function() {
         }
     });
 
-    // On/Off marker group
+    /**
+     * On/Off marker group
+     */
     $('.js-group').on('click', function(e) {
         var button = $(this);
         var group;
@@ -195,7 +226,10 @@ DG.then(function() {
         }
     });
 
-    // Update event
+    /**
+     * Update event
+     * @return void
+     */
     function updateEventEditButton() {
         $('.js-edit-marker').on('click', function(e) {
             var marker = $(this).parent();
